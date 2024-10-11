@@ -1,4 +1,3 @@
-
 install.packages("readr")
 library(readr)
 library(tidyverse)
@@ -10,8 +9,7 @@ video_games <- readr::read_csv("https://raw.githubusercontent.com/rfordatascienc
 
 # read in raw data
 raw_df <- url %>% 
-  fread() %>% 
-
+  read_csv() %>% 
   janitor::clean_names() 
 
 # clean up some of the factors and playtime data
@@ -29,81 +27,6 @@ clean_df <- raw_df %>%
          metascore = as.double(str_sub(score_rank_userscore_metascore, start = -4, end = -3))) %>% 
   select(-score_rank_userscore_metascore, -score_rank, -playtime_median) %>% 
   rename(publisher = publisher_s, developer = developer_s)
-
-
-#Overall Data Set
-
-#26688 rows, 10 variables
-
-summary(raw_df)
-
-# Game Number
-#A generic number label for the game, not all numbers are filled in range
-
-plot(density(raw_df$number), main="Game Number Density")
-summary(raw_df$number)
-sum(is.na(raw_df$number))
-
-#not sure this is useful
-
-
-#Game Titles
-
-#Character variable with name of the games
-
-length(raw_df$game)
-length(unique(raw_df$game))
-sum(is.na(raw_df$game))
-
-# 3 NAs, 75 repeated game names 
-
-
-#Release Dates
-
-#currently a character variable not a date variable.
-
-summary(raw_df$release_date)
-
-dates<-as.Date(raw_df$release_date, tryFormats = c( "%B %Y", "%B %d, %Y" ))
-
-summary(dates)
-# 42 release dates which are alternatively labelled, No NAs 
-#Date range from 2004 to 2018, predominantly 2015 onwards
-
-plot(dates)
-
-#Price 
-
-# Price is currently a character vairable, 728 missing vals
-
-
-summary(raw_df$price)
-
-raw_df$price[which(raw_df$price=="Free")]<-0
-
-prices1<-as.numeric(raw_df$price)
-
-nonfree_prices1<-  prices1[prices1!=0]
-
-prices2<-nonfree_prices1[nonfree_prices1<100]
-
-plot(density(prices2, na.rm=T))
-
-summary(nonfree_prices1)
-
-
-#right skewed, range up to 595. Median = 5.99, fairly normally distributed. 
-
-
-#Owners
-
-#chracter variable 
-
-raw_df$owners
-
-length(unique(raw_df$owners))
-
-plot(as.factor(raw_df$owners))
 
 #26688 games, 10 columns
 #Some NAs are because the game is free, others are "N/A", ranges from 0.49 to 200 ($?)
@@ -138,6 +61,5 @@ raw_df$publishercount = tab[raw_df$publisher_s]
 raw_df$developercount = tab[raw_df$developer_s]
 #Developer:
 #Same idea I think
-
 
 
