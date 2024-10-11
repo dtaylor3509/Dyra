@@ -1,8 +1,10 @@
 
 install.packages("readr")
+library(data.table)
 library(readr)
 library(tidyverse)
 library(dplyr)
+library(MASS)
 # clean dataset from lizawood's github
 url <- "https://raw.githubusercontent.com/lizawood/apps-and-games/master/PC_Games/PCgames_2004_2018_raw.csv"
 
@@ -83,6 +85,8 @@ raw_df$price[which(raw_df$price=="Free")]<-0
 
 prices1<-as.numeric(raw_df$price)
 
+raw_df$price<- prices1
+
 nonfree_prices1<-  prices1[prices1!=0]
 
 prices2<-nonfree_prices1[nonfree_prices1<100]
@@ -134,10 +138,40 @@ raw_df$published_count = 0
 
 tabP = table(raw_df$publisher_s,useNA = "always")
 tabD = table(raw_df$developer_s,useNA = "always")
-raw_df$publishercount = tab[raw_df$publisher_s]
-raw_df$developercount = tab[raw_df$developer_s]
+raw_df$publishercount = tabP[raw_df$publisher_s]
+raw_df$developercount = tabD[raw_df$developer_s]
 #Developer:
 #Same idea I think
 
+unique(raw_df$owners)
+
+raw_df$owners<- str_replace_all( raw_df$owners, "\\s+", " ")
+
+factored_owners<-factor(raw_df$owners, order=T, levels=c("0 .. 20,000", "20,000 .. 50,000", "50,000 .. 100,000", "100,000 .. 200,000", "200,000 .. 500,000", "500,000 .. 1,000,000" ,
+                                        "1,000,000 .. 2,000,000", "2,000,000 .. 5,000,000", "5,000,000 .. 10,000,000" , "10,000,000 .. 20,000,000", "20,000,000 .. 50,000,000", 
+                                        "50,000,000 .. 100,000,000","100,000,000 .. 200,000,000" ))
+
+
+raw_df$owners<- factored_owners
+
+# Regression
+
+raw_df$price
+
+mod<-polr(owners ~ publishercount, data = raw_df)
+
+mod<-polr(owners ~ price, data = raw_df)
+
+summary(mod)
+
+hist(raw_df$owners)
+
+raw_df$owners[-"0 .. 20,000"]
+
+plot(subset(raw_df)$owners)
+plot(subset(raw_df,owners != "0 .. 20,000")$owners)
+
+
+lbs<- raw_df$owners
 
 
